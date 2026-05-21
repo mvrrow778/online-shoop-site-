@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактирование: {{ product.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .current-img {
+            max-width: 150px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container">
+    <div class="form-container">
+        <h2 class="mb-4 text-center">Редактировать товар</h2>
+        <p class="text-muted text-center small">ID товара: #{{ product.id }}</p>
+        <hr>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Название -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Название товара</label>
+                <input type="text" name="name" class="form-control" value="{{ product.name }}" required>
+            </div>
+
+            <!-- Категория (если нужно менять) -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Категория</label>
+                <select name="category" class="form-select">
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if cat.id == product.category.id %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row">
+                <!-- Цена -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Цена (тг)</label>
+                    <input type="number" name="price" class="form-control" value="{{ product.price }}" required>
+                </div>
+                <!-- Количество -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Количество на складе</label>
+                    <input type="number" name="quantity" class="form-control" value="{{ product.quantity }}" required>
+                </div>
+            </div>
+
+            <!-- Описание -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Описание</label>
+                <textarea name="description" class="form-control" rows="4">{{ product.description }}</textarea>
+            </div>
+
+            <!-- Изображение -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Изображение товара</label>
+                {% if product.image %}
+                    <div class="mb-2">
+                        <small class="text-muted">Сейчас установлено:</small>
+                        <img src="{{ product.image.url }}" class="current-img border">
+                    </div>
+                {% endif %}
+                <input type="file" name="image" class="form-control" accept="image/*">
+                <div class="form-text">Оставьте пустым, если не хотите менять фото.</div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">Сохранить изменения</button>
+                <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

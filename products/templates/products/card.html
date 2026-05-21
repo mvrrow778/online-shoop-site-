@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <a href="/" class="btn btn-outline-secondary mb-4">← На главную</a>
+        
+        <div class="card shadow-sm border-0">
+            <div class="row g-0">
+                <div class="col-md-7">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="img-fluid rounded-start w-100" style="object-fit: cover; max-height: 500px;">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-start" style="height: 400px;">
+                            <span>Нет изображения</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-5">
+                    <div class="card-body p-4">
+                        <span class="badge bg-info text-dark mb-2">{{ product.category.name }}</span>
+                        <h1 class="display-6 fw-bold">{{ product.name }}</h1>
+                        <h2 class="text-primary my-4">{{ product.price }} тенге</h2>
+                        
+                        <p class="text-muted">Описание:</p>
+                        <p class="lead">{{ product.description|default:"Описание пока не добавлено." }}</p>
+                        
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="fs-5"><b>Остаток на складе:</b></span>
+                            <span class="badge {% if product.quantity > 0 %}bg-success{% else %}bg-danger{% endif %} fs-6">
+                                {{ product.quantity }} шт.
+                            </span>
+                        </div>
+
+                        {% if user.is_authenticated and user.profile.role == 'cashier' %}
+                            {% if product.quantity > 0 %}
+                                <a href="{% url 'buy_product' product.id %}" class="btn btn-success btn-lg w-100">Оформить покупку</a>
+                            {% else %}
+                                <button class="btn btn-secondary btn-lg w-100" disabled>Товара нет в наличии</button>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

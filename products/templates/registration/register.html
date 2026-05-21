@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация сотрудника</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card shadow-sm" style="width: 420px;">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Регистрация сотрудника</h3>
+
+                {% if messages %}
+                    {% for m in messages %}
+                        <div class="alert alert-{{ m.tags|default:'info' }}">{{ m }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Логин</label>
+                        <input type="text" name="username" class="form-control" required
+                               minlength="3" maxlength="150"
+                               value="{{ form_data.username|default:'' }}">
+                        <div class="form-text">От 3 до 150 символов.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" name="password1" class="form-control" required minlength="6">
+                        <div class="form-text">Минимум 6 символов.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Повторите пароль</label>
+                        <input type="password" name="password2" class="form-control" required minlength="6">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Должность</label>
+                        <select name="role" class="form-select">
+                            <option value="cashier" {% if form_data.role == 'cashier' %}selected{% endif %}>Кассир (Продажи)</option>
+                            <option value="stockman" {% if form_data.role == 'stockman' %}selected{% endif %}>Складовик (Учет)</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Создать аккаунт</button>
+                    </div>
+                </form>
+
+                <hr>
+                <p class="text-center mb-0">
+                    Уже зарегистрированы? <a href="{% url 'login' %}">Войти</a>
+                </p>
+                <p class="text-center mt-2 mb-0">
+                    <a href="/" class="text-muted small">← На главную</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

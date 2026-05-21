@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Магазин</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">My shop</a>
+            <div class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <span class="nav-link text-light">
+                        Сотрудник: <strong>{{ user.username }}</strong> 
+                        (<span class="badge bg-info text-dark">{{ user.profile.get_role_display }}</span>)
+                    </span>
+                
+                    {% if user.profile.role == 'stockman' %}
+                        <a class="btn btn-warning btn-sm ms-2" href="{% url 'add_product' %}">+ Добавить товар</a>
+                    {% endif %}
+                
+                    <form action="{% url 'logout' %}" method="post" class="d-inline ms-2">
+    			{% csrf_token %}
+    			<button type="submit" class="btn btn-outline-danger btn-sm">Выйти</button>
+		    </form>
+                {% else %}
+                    <a class="btn btn-outline-light btn-sm me-2" href="{% url 'login' %}">Войти</a>
+                    <a class="btn btn-primary btn-sm" href="{% url 'register' %}">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        {% if messages %}
+            {% for m in messages %}
+                <div class="alert alert-{{ m.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    {{ m }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <h1 class="mb-4">Витрина товаров</h1>
+
+	<div class="container mb-4">
+    	    <div class="row">
+                <div class="col-md-6">
+                    <p class="text-muted">Текущий курс: 1$ = {{ usd_rate }} тг.</p>
+                </div>
+        
+        	{% if user.is_authenticated %}
+        	<div class="col-md-6 text-end">
+            	    <div class="card border-success shadow-sm d-inline-block p-2">
+                        <span class="text-success fw-bold">Общая выручка: {{ total_sales_sum }} тг.</span>
+            	    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+	<div class="container my-4">
+    	    <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="/" class="btn btn-outline-primary">Все товары</a>
+
+                {% for cat in categories %}
+            	    <a href="?category={{ cat.id }}" 
+               	        class="btn {% if request.GET.category == cat.id|stringformat:'s' %}btn-primary{% else %}btn-outline-secondary{% endif %} shadow-sm">
+                {{ cat.name }}
+            </a>
+                {% endfor %}
+            </div>
+	</div>
+        
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            {% for p in products %}
+            <div class="col">
+    <div class="card h-100 shadow-sm">
+        {% if p.image %}
+            <img src="{{ p.image.url }}" class="card-img-top" style="height: 280px; object-fit: cover;">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">{{ p.name }}</h5>
+            <p class="card-text text-primary fw-bold">{{ p.price }} тг.</p>
+            
+            <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modal{{ p.id }}">
+                        Подробнее
+                    </button>
+
+                    {% if user.is_authenticated %}
+                        {% if user.profile.role == 'cashier' %}
+                            <a href="/buy/{{ p.id }}/" class="btn btn-primary {% if p.quantity == 0 %}disabled{% endif %}">
+                                Продать (списать)
+                            </a>
+                        {% endif %}
+
+                        {% if user.profile.role == 'stockman' %}
+                            <a href="{% url 'edit_product' p.id %}" class="btn btn-warning text-dark fw-bold">
+                                Редактировать
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-light btn-sm text-muted">Войдите для работы</a>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal{{ p.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ p.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                {% if p.image %}
+                    <img src="{{ p.image.url }}" class="img-fluid rounded mb-3" style="max-height: 300px;">
+                {% endif %}
+                <p class="text-start"><strong>Категория:</strong> {{ p.category.name }}</p>
+                <p class="text-start"><strong>Описание:</strong> {{ p.description|default:"Описание скоро появится" }}</p>
+                <p class="text-start"><strong>Остаток:</strong> {{ p.quantity }} шт.</p>
+                <h4 class="text-primary">{{ p.price }} тг.</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                
+                {% if user.is_authenticated and user.profile.role == 'cashier' %}
+                    {% if p.quantity > 0 %}
+                        <a href="/buy/{{ p.id }}/" class="btn btn-success">Купить за {{ p.price }} тг.</a>
+                    {% else %}
+                        <button class="btn btn-secondary" disabled>Нет в наличии</button>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

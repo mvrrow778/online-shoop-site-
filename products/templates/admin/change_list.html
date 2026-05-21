@@ -1,0 +1,14 @@
+{% extends "admin/change_list.html" %}
+{% block content_title %}
+    <h1>{{ title }}</h1>
+    <div style="background: #264b5d; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin: 0;"> Общая выручка: <strong>{{ total_sales_amount }} тг.</strong></h3>
+        <hr>
+        <p style="margin-bottom: 5px;"><strong>По категориям:</strong></p>
+        <ul style="list-style: none; padding-left: 0;">
+            {% for stat in categories_stat %}
+                <li> {{ stat.name }}: {{ stat.total }} тг.</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
